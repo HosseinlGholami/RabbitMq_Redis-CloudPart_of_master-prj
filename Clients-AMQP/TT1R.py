@@ -15,9 +15,9 @@ parameters = pika.ConnectionParameters('localhost',
 
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
-channel.queue_declare(queue='task_queue', durable=True)
+channel.queue_declare(queue='hello')
 
-channel.basic_consume(queue='task_queue',
+channel.basic_consume(queue='hello',
                       on_message_callback=callback)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
