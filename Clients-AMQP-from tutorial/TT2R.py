@@ -20,12 +20,12 @@ channel = connection.channel()
     #declare queue and make it durable ! means the massege wich are not recived 
     #should be recived if we dont set this flag , the previous massge which are 
     #stored in queue , will be removed
-channel.queue_declare(queue='task_queue', durable=True)
+#channel.queue_declare(queue='task_queue', durable=True)
     #if we add this line , its like we have load blacing and if we have 
     #idle consumer , we add some task to him 
 channel.basic_qos(prefetch_count=1)
 
-channel.basic_consume(queue='task_queue',
+channel.basic_consume(queue='classic_queue_1',
                       on_message_callback=callback)
 
 
