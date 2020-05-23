@@ -5,12 +5,22 @@ parameters = pika.ConnectionParameters('localhost',
                                        5672,
                                        '/',
                                        credentials)
-for i in range (3):
+for i in range (100):
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     
     message = "salaam."+str(i)
-    channel.basic_publish(exchange='ex.mqtt', routing_key='', body=message)          
+
+    
+    channel.basic_publish(exchange='ex.mqtt',
+                          routing_key='',
+                          body=message,
+                          properties=pika.BasicProperties(                    
+                              delivery_mode = 2, # make message persistent
+                              )
+                          )
+    
+    
     
     print(" [x] Sent %r" % message)
     connection.close()
