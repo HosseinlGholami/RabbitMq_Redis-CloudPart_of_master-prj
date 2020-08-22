@@ -4,23 +4,24 @@ networks:
   app-tier:
     driver: bridge
 
-
+    
 services:
-  rabbitmq:
-    build: .
-    container_name: rabbitHGH
+  queue:
+    build: rbmq/.
+    container_name: rabbitmq
     ports:
-      - 5672:5672
-      - 15672:15672
-      - 1884:1884
-    environment: 
-      - RABBITMQ_CONFIG_FILE=/etc/rabbitmq/rabbitmq.conf
+      - 5672:5672 
+      - 15672:15672 
+      - 1884:1884 
+    volumes:
+      - "C:/Users/hosse/Docker/Rabbitmq/rbmq/Conf/:/etc/rabbitmq/"
     networks:
       - app-tier
 
-      
-  
-  # myapp:
-  #   image: 'YOUR_APPLICATION_IMAGE'
-  #   networks:
-  #     - app-tier
+  consumer:
+    build: sl/.
+    container_name: stl
+    volumes:
+      - "C:/Users/hosse/Docker/Rabbitmq/sl/log/:/usr/src/app/log"
+    networks:
+      - app-tier
