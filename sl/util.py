@@ -4,6 +4,7 @@ import threading
 import ctypes
 import pandas as pd
 from pandas.io.json import json_normalize
+import redis
 
 
 def init(): 
@@ -40,6 +41,10 @@ class rbmq(threading.Thread):
                           on_message_callback=self.callbackfunc,
                           consumer_tag=self.slug)
             print( self.slug ,' [*] Waiting for messages on :',self.queuename )
+            client = redis.Redis(host='redis', port=6379)
+            value = client.get('hello')
+            print(value)
+
             channel.start_consuming()
         finally: 
             connection.close()
@@ -64,6 +69,10 @@ class rbmq(threading.Thread):
     
 def Packet_Handeler_callback(ch, method, properties, body):
     print("Received   ",body.decode("utf-8") +" from :",method.consumer_tag)
+    client = redis.Redis(host='redis', port=6379)
+    value = client.get('hello from redis inside python app')
+    print(value)
+
     with open(".//log//log.txt", "a") as myfile :
         myfile.write("{Received :"+str(body.decode("utf-8"))+"},{from:"+str(method)+"}\n")
     time.sleep(1)

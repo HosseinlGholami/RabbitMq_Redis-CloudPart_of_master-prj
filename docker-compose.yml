@@ -25,3 +25,14 @@ services:
       - "C:/Users/hosse/Docker/Rabbitmq/sl/log/:/usr/src/app/log"
     networks:
       - app-tier
+  cache:
+    image: redis:latest
+    container_name: redis
+    ports:
+        - 6379:6379
+    volumes:
+        - C:/Users/hosse/Docker/Rabbitmq/redis/config/redis.conf:/redis.conf
+        - C:/Users/hosse/Docker/Rabbitmq/redis/Data:/data
+    command: [ "redis-server", "/redis.conf" ]
+    networks:
+      - app-tier
