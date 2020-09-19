@@ -5,10 +5,10 @@ import ctypes
 import pandas as pd
 from pandas.io.json import json_normalize
 import redis
-
+import json
 
 def init(): 
-    time.sleep(45)
+    time.sleep(15)
     #pika initialization
     credentials = pika.PlainCredentials('hgh', 'guest')
     parameters = pika.ConnectionParameters('rabbitmq',
@@ -41,10 +41,6 @@ class rbmq(threading.Thread):
                           on_message_callback=self.callbackfunc,
                           consumer_tag=self.slug)
             print( self.slug ,' [*] Waiting for messages on :',self.queuename )
-            client = redis.Redis(host='redis', port=6379)
-            value = client.get('hello')
-            print(value)
-
             channel.start_consuming()
         finally: 
             connection.close()
@@ -68,15 +64,18 @@ class rbmq(threading.Thread):
        
     
 def Packet_Handeler_callback(ch, method, properties, body):
-    print("Received   ",body.decode("utf-8") +" from :",method.consumer_tag)
+    #print("Received   ",body.decode("utf-8") +" from :",method.consumer_tag)
+    Str=str(body.decode("utf-8"))
+    Data=json.loads(Str)
+    print({'timestamp':Data['timestamp'],'event':Data['event']})
     client = redis.Redis(host='redis', port=6379)
-    value = client.get('hello from redis inside python app')
-    print(value)
-
-    with open(".//log//log.txt", "a") as myfile :
-        myfile.write("{Received :"+str(body.decode("utf-8"))+"},{from:"+str(method)+"}\n")
-    time.sleep(1)
-    ch.basic_ack(delivery_tag = method.delivery_tag)
+    send_correct = client.xadd(name=Data['driver_id'],fields={'timestamp':Data['timestamp'],'event':Data['event']})
+    #save Fails in log file 
+    if not(send_correct):
+        with open(".//log//log.txt", "a") as myfile :
+            #myfile.write("{Received :"+str(body.decode("utf-8"))+"},{from:"+str(method)+"}\n")
+            myfile.write(Str)
+        ch.basic_ack(delivery_tag = method.delivery_tag)
 
 def CreateSL(consumer_tag,parameters,prefetch_count,Queue_Name):
     return rbmq(Slug=consumer_tag,
