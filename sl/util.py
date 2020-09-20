@@ -3,14 +3,15 @@ import time
 import threading 
 import ctypes
 import pandas as pd
-from pandas.io.json import json_normalize
-import redis
+from pandas import json_normalize
 import json
+import redis
+
 
 def init(): 
     time.sleep(15)
     #pika initialization
-    credentials = pika.PlainCredentials('hgh', 'guest')
+    credentials = pika.PlainCredentials('CNSMR', 'guest')
     parameters = pika.ConnectionParameters('rabbitmq',
                                        5672,
                                        '/',
@@ -67,7 +68,7 @@ def Packet_Handeler_callback(ch, method, properties, body):
     #print("Received   ",body.decode("utf-8") +" from :",method.consumer_tag)
     Str=str(body.decode("utf-8"))
     Data=json.loads(Str)
-    print({'timestamp':Data['timestamp'],'event':Data['event']})
+    #print({'timestamp':Data['timestamp'],'event':Data['event']})
     client = redis.Redis(host='redis', port=6379)
     send_correct = client.xadd(name=Data['driver_id'],fields={'timestamp':Data['timestamp'],'event':Data['event']})
     #save Fails in log file 
@@ -75,7 +76,7 @@ def Packet_Handeler_callback(ch, method, properties, body):
         with open(".//log//log.txt", "a") as myfile :
             #myfile.write("{Received :"+str(body.decode("utf-8"))+"},{from:"+str(method)+"}\n")
             myfile.write(Str)
-        ch.basic_ack(delivery_tag = method.delivery_tag)
+    ch.basic_ack(delivery_tag = method.delivery_tag)
 
 def CreateSL(consumer_tag,parameters,prefetch_count,Queue_Name):
     return rbmq(Slug=consumer_tag,
