@@ -17,7 +17,7 @@ services:
       - "C:/Users/hosse/Docker/Rabbitmq/rbmq/Conf/:/etc/rabbitmq/"
     networks:
       - app-tier
-
+      
   consumer:
     build: sl/.
     container_name: stl

@@ -19,7 +19,6 @@ def init():
     return parameters
 
 class rbmq(threading.Thread): 
-  
     # Thread class with a _stop() method.  
     # The thread itself has to check 
     # regularly for the stopped() condition. 
@@ -65,16 +64,14 @@ class rbmq(threading.Thread):
        
     
 def Packet_Handeler_callback(ch, method, properties, body):
-    #print("Received   ",body.decode("utf-8") +" from :",method.consumer_tag)
     Str=str(body.decode("utf-8"))
     Data=json.loads(Str)
-    #print({'timestamp':Data['timestamp'],'event':Data['event']})
     client = redis.Redis(host='redis', port=6379)
-    send_correct = client.xadd(name=Data['driver_id'],fields={'timestamp':Data['timestamp'],'event':Data['event']})
+    send_correct = client.hset(name=Data['driver_id'],key=Data['timestamp'],value=Data['event'])
+    print('Data_from: ',Data['driver_id'])
     #save Fails in log file 
     if not(send_correct):
         with open(".//log//log.txt", "a") as myfile :
-            #myfile.write("{Received :"+str(body.decode("utf-8"))+"},{from:"+str(method)+"}\n")
             myfile.write(Str)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
@@ -87,7 +84,6 @@ def CreateSL(consumer_tag,parameters,prefetch_count,Queue_Name):
                 )
 
                 
-
 def active_sLs(number_of_SL,parameters,prefetch_count,Queue_Name):
     handler=list()
     for consumer_tag in range(number_of_SL):
